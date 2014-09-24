@@ -19,7 +19,7 @@ g++ ttt.cpp -fopemp -o omp_ttt
 
 While this improves runtime, it does not equally balance the load.  A new thread is created for each processor of the computer and the 255168 games are split equally amongst the threads.
 
-If 6 threads are created, they split as follows:
+If 6 threads are created, they split as follows
 1. games 0 through 42527
 2. games 42528 through 85055
 3. games 85056 through 127583
