@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <thread>
 #include <getopt.h> //for getopt()
 #include <cstdlib> //for exit()
 
@@ -41,6 +42,9 @@ std::vector <game>* games = &gamesvector; //a pointer to gamesvector
 bool all_moves_completed = false;
 int games_deleted_rotation = 0; //how many games have been deleted
 int games_deleted_symmetry = 0;
+
+int threadcount = 1;
+int badmutex = 0;
 
 void makeSeeds() //it is assumed that 1 moves first
 {
@@ -301,42 +305,70 @@ void eraseWinner10() //delete all the games that are symmetric or rotations of p
 			(*games).erase((*games).begin() + i);
 			count++;
 		}
-	std::cout << "removed " << count << " games" << std::endl;
+	std::cout << "Removed " << count << " games." << std::endl;
 }/**/
 
-void cleanGames() //go cackwards through the games and delete rotations and symmetries
+void cleanGamesRotated(int gameindex)
 {
-	std::cout << "cleaning games" << std::endl;
+	for (int i = 0; i < gameindex; i++)
+		if (testRotationGame((*games).at(gameindex),(*games).at(i))) //test rotation
+			(*games).at(gameindex).winner = 10;
+	badmutex--; //thread complete
+}
+
+void cleanGamesSymmetric(int gameindex)
+{
+	for (int i = 0; i < gameindex; i++)
+		if (testSymmetryGame((*games).at(gameindex),(*games).at(i))) //test symmetry
+			(*games).at(gameindex).winner = 10;
+	badmutex--;
+}
+
+void cleanGamesBoth(int gameindex)
+{
+	for (int i = 0; i < gameindex; i++)
+		if (testSymmetryRotationGame((*games).at(gameindex),(*games).at(i))) //test symmetry
+			(*games).at(gameindex).winner = 10;
+	badmutex--;
+}
+
+void cleanGames() //go backwards through the games and delete rotations and symmetries
+{
+	std::cout << "Cleaning games";
+	if (threadcount > 1) std::cout << " using " << threadcount << " threads.";
+	std::cout << std::endl;
+
+	std::vector<std::thread> threads;
+
 	if (b_cleanrotated) {
-		std::cout << "cleaning rotated games.." << std::endl;
-		#pragma omp parallel for
+		std::cout << "Cleaning rotated games.." << std::endl;
 		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) { //from (size -1) to zero
-			//std::cout << "processing game " << gameindex << std::endl;
-			for (int i = 0; i < gameindex; i++)
-				if (testRotationGame((*games).at(gameindex),(*games).at(i))) //test rotation
-					(*games).at(gameindex).winner = 10;
+			while (badmutex >= threadcount) {} //wait until badmutex has an opening
+			badmutex++; //thread count
+			threads.push_back(std::thread(cleanGamesRotated, gameindex));
 		}
-	eraseWinner10();
+		while (badmutex > 0) {} //wait until all threads complete
+		eraseWinner10();
 	}
 	if (b_cleansymmetric) {
-		std::cout << "cleaning symmetric games.." << std::endl;
-		#pragma omp parallel for
-		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) { //from (size -1) to zero
-			for (int i = 0; i < gameindex; i++)
-				if (testSymmetryGame((*games).at(gameindex),(*games).at(i))) //test symmetry
-					(*games).at(gameindex).winner = 10;
+		std::cout << "Cleaning symmetric games.." << std::endl;
+		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) {
+			while (badmutex >= threadcount) {}
+			badmutex++;
+			threads.push_back(std::thread(cleanGamesSymmetric, gameindex));
 		}
-	eraseWinner10();
+		while (badmutex > 0) {}
+		eraseWinner10();
 	}
 	if (b_cleanboth) {
-		std::cout << "cleaning rotated, symmetric games.." << std::endl;
-		#pragma omp parallel for
-		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) { //from (size -1) to zero
-			for (int i = 0; i < gameindex; i++)
-				if (testSymmetryRotationGame((*games).at(gameindex),(*games).at(i))) //test symmetry
-					(*games).at(gameindex).winner = 10;
+		std::cout << "Cleaning rotated, symmetric games.." << std::endl;
+		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) {
+			while (badmutex >= threadcount) {}
+			badmutex++;
+			threads.push_back(std::thread(cleanGamesBoth, gameindex));
 		}
-	eraseWinner10();
+		while (badmutex > 0) {}
+		eraseWinner10();
 	}
 }/**/
 
@@ -371,7 +403,7 @@ void printReport() //before results have been cleaned
 int main(int argc, char* argv[])
 {
 	int c;
-	while ((c = getopt(argc, argv, "rsbh")) != -1) {
+	while ((c = getopt(argc, argv, "rsbt:h")) != -1) {
 		switch (c) {
 			case 'r':
 				b_cleanrotated = true;
@@ -379,16 +411,27 @@ int main(int argc, char* argv[])
 			case 's':
 				b_cleansymmetric = true;
 				break;
-			case 'b': //clean everything!
+			case 'b': // clean everything!
 				b_cleanrotated = true;
 				b_cleansymmetric = true;
 				b_cleanboth = true;
+				break;
+			case 't': // threads! note that -t=4 causes an error; use -t4
+				threadcount = atoi(optarg);
+				if (threadcount < 1) {
+					std::cout << "invalid thread argument (" << optarg << ") settings threads = 1" << std::endl;
+					threadcount = 1;
+				}
 				break;
 			case 'h':
 				std::cout << "tic tac toe halp - please explain program" << std::endl
 				          << "-r\tclean rotated games" << std::endl
 				          << "-s\tclean symmetric games" << std::endl
 				          << "-b\tclean rotated, symmetric games" << std::endl
+				          << "-t:\tspecify number of threads" << std::endl
+				          << std::endl
+				          << "usage: ./m_ttt -rsb -t5" << std::endl
+				          << "run full program, reduce all games with each method, reduce with 5 threads" << std::endl
 				;
 				exit(0); break;
 			default:;
