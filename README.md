@@ -45,7 +45,7 @@ If 6 threads are created, they split as follows:
 5. Games 170112 through 212639
 6. Games 212640 through 255167
 
-Due to the nature of my solution, each game is checked against each game preceeding it - therefore the higher the game index, the more games to be checked.
+Due to the nature of my solution, each game is checked against each game preceding it - therefore the higher the game index, the more games to be checked.
 
 Stage 3 - std::thread
 ---
@@ -78,7 +78,7 @@ Stage 4 - Cleanup/Final?
 
 I intend to
 
-1. Make threading optional such that this cn be compiled with s standard prior to c++11.
+1. Make threading optional such that this can be compiled with a standard prior to c++11.
 2. Test the difference in runtimes between versions.
 
 I may also attempt to get this to run under Windows and/or add threading to the generation functions.
