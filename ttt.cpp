@@ -401,6 +401,9 @@ void printReport() //before results have been cleaned
 
 int main(int argc, char* argv[])
 {
+	threadcount = (int) std::thread::hardware_concurrency();
+	std::cout << "Automatically setting " << threadcount << " threads based upon hardware." << std::endl;
+	
 	int c;
 	while ((c = getopt(argc, argv, "rsbt:h")) != -1) {
 		switch (c) {
@@ -418,9 +421,10 @@ int main(int argc, char* argv[])
 			case 't': // threads! note that -t=4 causes an error; use -t4
 				threadcount = atoi(optarg);
 				if (threadcount < 1) {
-					std::cout << "invalid thread argument (" << optarg << ") settings threads = 1" << std::endl;
+					std::cout << "Invalid thread argument (" << optarg << ")" << std::endl;
 					threadcount = 1;
 				}
+				std::cout << "Program will use " << threadcount << " threads." << std::endl;
 				break;
 			case 'h':
 				std::cout << "tic tac toe halp - please explain program" << std::endl
@@ -429,7 +433,7 @@ int main(int argc, char* argv[])
 				          << "-b\tclean rotated, symmetric games" << std::endl
 				          << "-t:\tspecify number of threads" << std::endl
 				          << std::endl
-				          << "usage: ./m_ttt -rsb -t5" << std::endl
+				          << "usage: ./m_ttt -b -t5" << std::endl
 				          << "run full program, reduce all games with each method, reduce with 5 threads" << std::endl
 				;
 				exit(0); break;
