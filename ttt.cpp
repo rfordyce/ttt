@@ -8,6 +8,9 @@
 bool b_cleanrotated = false;
 bool b_cleansymmetric = false;
 bool b_cleanboth = false;
+int threadcount = 1;
+
+int threadsrunning = 0;
 
 struct board {
 	// 0 1 2
@@ -42,9 +45,6 @@ std::vector <game>* games = &gamesvector; //a pointer to gamesvector
 bool all_moves_completed = false;
 int games_deleted_rotation = 0; //how many games have been deleted
 int games_deleted_symmetry = 0;
-
-int threadcount = 1;
-int badmutex = 0;
 
 void makeSeeds() //it is assumed that 1 moves first
 {
@@ -279,7 +279,6 @@ bool testSymmetryRotationGame(game g, game gtest)
 {
 	if (g.boards.size() != gtest.boards.size()) return false; //cannot be the same if not the same size
 	if (g.winner != gtest.winner) return false; //cannot be the same if different winner
-	int counter_symmetric_entries = 0;
 
 	game gmodified;
 	
@@ -313,7 +312,7 @@ void cleanGamesRotated(int gameindex)
 	for (int i = 0; i < gameindex; i++)
 		if (testRotationGame((*games).at(gameindex),(*games).at(i))) //test rotation
 			(*games).at(gameindex).winner = 10;
-	badmutex--; //thread complete
+	threadsrunning--; //thread complete
 }
 
 void cleanGamesSymmetric(int gameindex)
@@ -321,7 +320,7 @@ void cleanGamesSymmetric(int gameindex)
 	for (int i = 0; i < gameindex; i++)
 		if (testSymmetryGame((*games).at(gameindex),(*games).at(i))) //test symmetry
 			(*games).at(gameindex).winner = 10;
-	badmutex--;
+	threadsrunning--;
 }
 
 void cleanGamesBoth(int gameindex)
@@ -329,7 +328,7 @@ void cleanGamesBoth(int gameindex)
 	for (int i = 0; i < gameindex; i++)
 		if (testSymmetryRotationGame((*games).at(gameindex),(*games).at(i))) //test symmetry
 			(*games).at(gameindex).winner = 10;
-	badmutex--;
+	threadsrunning--;
 }
 
 void cleanGames() //go backwards through the games and delete rotations and symmetries
@@ -343,31 +342,31 @@ void cleanGames() //go backwards through the games and delete rotations and symm
 	if (b_cleanrotated) {
 		std::cout << "Cleaning rotated games.." << std::endl;
 		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) { //from (size -1) to zero
-			while (badmutex >= threadcount) {} //wait until badmutex has an opening
-			badmutex++; //thread count
+			while (threadsrunning >= threadcount) {} //wait until threadsrunning has an opening
+			threadsrunning++; //thread count
 			threads.push_back(std::thread(cleanGamesRotated, gameindex));
 		}
-		while (badmutex > 0) {} //wait until all threads complete
+		while (threadsrunning > 0) {} //wait until all threads complete
 		eraseWinner10();
 	}
 	if (b_cleansymmetric) {
 		std::cout << "Cleaning symmetric games.." << std::endl;
 		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) {
-			while (badmutex >= threadcount) {}
-			badmutex++;
+			while (threadsrunning >= threadcount) {}
+			threadsrunning++;
 			threads.push_back(std::thread(cleanGamesSymmetric, gameindex));
 		}
-		while (badmutex > 0) {}
+		while (threadsrunning > 0) {}
 		eraseWinner10();
 	}
 	if (b_cleanboth) {
 		std::cout << "Cleaning rotated, symmetric games.." << std::endl;
 		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) {
-			while (badmutex >= threadcount) {}
-			badmutex++;
+			while (threadsrunning >= threadcount) {}
+			threadsrunning++;
 			threads.push_back(std::thread(cleanGamesBoth, gameindex));
 		}
-		while (badmutex > 0) {}
+		while (threadsrunning > 0) {}
 		eraseWinner10();
 	}
 }/**/

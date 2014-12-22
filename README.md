@@ -10,10 +10,11 @@ A more detailed look at this problem may be found [here][1]
 Compiling currently requires support for c++11 and POSIX threads (Linux).
 
 ```bash
+git clone https://github.com/rfordyce/ttt.git
+cd ./ttt
 make
+./m_ttt
 ```
-
----
 
 Stage 1 - Initial Program
 ---
@@ -55,19 +56,19 @@ To create threads, I use the following structure:
 ```c++
 #include <thread>
 
-int mutex = 0;
+int runningthreads = 0;
 
 FUNCTION (ARGUMENT)
 	PURPUSE
-	mutex--
+	runningthreads--
 
 MAIN
 	std::vector<std::thread> threads;
 	LOOP
-		WHILE (badmutex >= MAXTHREADS) {}
-		mutex++
+		WHILE (runningthreads >= MAXTHREADS) {}
+		runningthreads++
 		threads.push_back(std::thread(FUNCTION, ARGUMENTS));
-	WHILE (mutex > 0) {}
+	WHILE (runningthreads > 0) {}
 ```
 
 Using both a variable to track the number of threads and wait until they complete, and a vector of threads as described [here][2]
