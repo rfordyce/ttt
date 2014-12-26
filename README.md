@@ -3,6 +3,8 @@ ttt
 
 This project functions both as a way to familiarize myself with git and as a fast solver for the following problem:
 
+Presently fails due to memory issues.
+
 > How many unique tic tac toe games exist, excluding rotations and symmetries?
 
 A more detailed look at this problem may be found [here][1]
