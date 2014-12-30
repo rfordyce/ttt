@@ -7,9 +7,6 @@
 bool b_cleanrotated = false;
 bool b_cleansymmetric = false;
 bool b_cleanboth = false;
-int threadcount = 1;
-
-int threadsrunning = 0;
 
 struct board {
 	// 0 1 2
@@ -278,6 +275,7 @@ bool testSymmetryRotationGame(game g, game gtest)
 {
 	if (g.boards.size() != gtest.boards.size()) return false; //cannot be the same if not the same size
 	if (g.winner != gtest.winner) return false; //cannot be the same if different winner
+	int counter_symmetric_entries = 0;
 
 	game gmodified;
 	
@@ -306,76 +304,13 @@ void eraseWinner10() //delete all the games that are symmetric or rotations of p
 	std::cout << "removed " << count << " games" << std::endl;
 }/**/
 
-<<<<<<< HEAD
-void cleanGamesRotated(int gameindex)
-{
-	for (int i = 0; i < gameindex; i++)
-		if (testRotationGame((*games).at(gameindex),(*games).at(i))) //test rotation
-			(*games).at(gameindex).winner = 10;
-	threadsrunning--; //thread complete
-}
-
-void cleanGamesSymmetric(int gameindex)
-{
-	for (int i = 0; i < gameindex; i++)
-		if (testSymmetryGame((*games).at(gameindex),(*games).at(i))) //test symmetry
-			(*games).at(gameindex).winner = 10;
-	threadsrunning--;
-}
-
-void cleanGamesBoth(int gameindex)
-{
-	for (int i = 0; i < gameindex; i++)
-		if (testSymmetryRotationGame((*games).at(gameindex),(*games).at(i))) //test symmetry
-			(*games).at(gameindex).winner = 10;
-	threadsrunning--;
-}
-
-void cleanGames() //go backwards through the games and delete rotations and symmetries
-{
-	std::cout << "Cleaning games";
-	if (threadcount > 1) std::cout << " using " << threadcount << " threads.";
-	std::cout << std::endl;
-
-	std::vector<std::thread> threads;
-
-=======
 void cleanGames() //go cackwards through the games and delete rotations and symmetries
 {
 	std::cout << "cleaning games" << std::endl;
->>>>>>> parent of 6fd016a... Modified for very simple threading of games reduction.
 	if (b_cleanrotated) {
 		std::cout << "cleaning rotated games.." << std::endl;
 		#pragma omp parallel for
 		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) { //from (size -1) to zero
-<<<<<<< HEAD
-			while (threadsrunning >= threadcount) {} //wait until threadsrunning has an opening
-			threadsrunning++; //thread count
-			threads.push_back(std::thread(cleanGamesRotated, gameindex));
-		}
-		while (threadsrunning > 0) {} //wait until all threads complete
-		eraseWinner10();
-	}
-	if (b_cleansymmetric) {
-		std::cout << "Cleaning symmetric games.." << std::endl;
-		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) {
-			while (threadsrunning >= threadcount) {}
-			threadsrunning++;
-			threads.push_back(std::thread(cleanGamesSymmetric, gameindex));
-		}
-		while (threadsrunning > 0) {}
-		eraseWinner10();
-	}
-	if (b_cleanboth) {
-		std::cout << "Cleaning rotated, symmetric games.." << std::endl;
-		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) {
-			while (threadsrunning >= threadcount) {}
-			threadsrunning++;
-			threads.push_back(std::thread(cleanGamesBoth, gameindex));
-		}
-		while (threadsrunning > 0) {}
-		eraseWinner10();
-=======
 			//std::cout << "processing game " << gameindex << std::endl;
 			for (int i = 0; i < gameindex; i++)
 				if (testRotationGame((*games).at(gameindex),(*games).at(i))) //test rotation
@@ -402,7 +337,6 @@ void cleanGames() //go cackwards through the games and delete rotations and symm
 					(*games).at(gameindex).winner = 10;
 		}
 	eraseWinner10();
->>>>>>> parent of 6fd016a... Modified for very simple threading of games reduction.
 	}
 }/**/
 
@@ -436,9 +370,6 @@ void printReport() //before results have been cleaned
 
 int main(int argc, char* argv[])
 {
-	threadcount = (int) std::thread::hardware_concurrency();
-	std::cout << "Automatically setting " << threadcount << " threads based upon hardware." << std::endl;
-	
 	int c;
 	while ((c = getopt(argc, argv, "rsbh")) != -1) {
 		switch (c) {
@@ -453,29 +384,11 @@ int main(int argc, char* argv[])
 				b_cleansymmetric = true;
 				b_cleanboth = true;
 				break;
-<<<<<<< HEAD
-			case 't': // threads! note that -t=4 causes an error; use -t4
-				threadcount = atoi(optarg);
-				if (threadcount < 1) {
-					std::cout << "Invalid thread argument (" << optarg << ")" << std::endl;
-					threadcount = 1;
-				}
-				std::cout << "Program will use " << threadcount << " threads." << std::endl;
-				break;
-=======
->>>>>>> parent of 6fd016a... Modified for very simple threading of games reduction.
 			case 'h':
 				std::cout << "tic tac toe halp - please explain program" << std::endl
 				          << "-r\tclean rotated games" << std::endl
 				          << "-s\tclean symmetric games" << std::endl
 				          << "-b\tclean rotated, symmetric games" << std::endl
-<<<<<<< HEAD
-				          << "-t:\tspecify number of threads" << std::endl
-				          << std::endl
-				          << "usage: ./m_ttt -b -t5" << std::endl
-				          << "run full program, reduce all games with each method, reduce with 5 threads" << std::endl
-=======
->>>>>>> parent of 6fd016a... Modified for very simple threading of games reduction.
 				;
 				exit(0); break;
 			default:;
