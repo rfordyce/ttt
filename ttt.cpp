@@ -8,6 +8,9 @@ bool b_cleanrotated = false;
 bool b_cleansymmetric = false;
 bool b_cleanboth = false;
 
+using std::cout;
+using std::endl;
+
 // 0 1 2
 // 3 4 5
 // 6 7 8
@@ -145,9 +148,9 @@ void addGames(game &g)
 
 void printBoard(const board &b)
 {
-	std::cout << b.layout[0] << b.layout[1] << b.layout[2] << std::endl
-	          << b.layout[3] << b.layout[4] << b.layout[5] << std::endl
-	          << b.layout[6] << b.layout[7] << b.layout[8] << std::endl
+	cout << b.layout[0] << b.layout[1] << b.layout[2] << endl
+	     << b.layout[3] << b.layout[4] << b.layout[5] << endl
+	     << b.layout[6] << b.layout[7] << b.layout[8] << endl
 	;
 }/**/
 
@@ -432,17 +435,17 @@ void eraseWinner10() //delete all the games that are symmetric or rotations of p
 			(*games).erase((*games).begin() + i);
 			count++;
 		}
-	std::cout << "removed " << count << " games" << std::endl;
+	cout << "removed " << count << " games" << endl;
 }/**/
 
 void cleanGames() //go cackwards through the games and delete rotations and symmetries
 {
-	std::cout << "cleaning games" << std::endl;
+	cout << "cleaning games" << endl;
 	if (b_cleanrotated) {
-		std::cout << "cleaning rotated games.." << std::endl;
+		cout << "cleaning rotated games.." << endl;
 		#pragma omp parallel for
 		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) { //from (size -1) to zero
-			//std::cout << "processing game " << gameindex << std::endl;
+			//cout << "processing game " << gameindex << endl;
 			for (int i = 0; i < gameindex; i++)
 				if (testRotationGame((*games).at(gameindex),(*games).at(i))) //test rotation
 					(*games).at(gameindex).winner = 10;
@@ -450,7 +453,7 @@ void cleanGames() //go cackwards through the games and delete rotations and symm
 	eraseWinner10();
 	}
 	if (b_cleansymmetric) {
-		std::cout << "cleaning symmetric games.." << std::endl;
+		cout << "cleaning symmetric games.." << endl;
 		#pragma omp parallel for
 		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) { //from (size -1) to zero
 			for (int i = 0; i < gameindex; i++)
@@ -460,7 +463,7 @@ void cleanGames() //go cackwards through the games and delete rotations and symm
 	eraseWinner10();
 	}
 	if (b_cleanboth) {
-		std::cout << "cleaning rotated, symmetric games.." << std::endl;
+		cout << "cleaning rotated, symmetric games.." << endl;
 		#pragma omp parallel for
 		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) { //from (size -1) to zero
 			for (int i = 0; i < gameindex; i++)
@@ -483,19 +486,19 @@ void printReport() //before results have been cleaned
 			case 2: qty2won++;break;
 			case 3: qtydraw++;break;
 			case 10:
-				std::cout << "a duplicate (winner = 10) wasn't deleted" << std::endl;
+				cout << "a duplicate (winner = 10) wasn't deleted" << endl;
 			default:
-				std::cout << "found bad value!" << std::endl;
+				cout << "found bad value!" << endl;
 		}
 	}
 	//int qtydraw = qty(*games) - (qty1won + qty2won);
-	std::cout << std::endl
-	          << "Report" << std::endl
-	          << "Total games  : " << qtygames << std::endl
-	          << "1 Wins games : " << qty1won << std::endl
-	          << "2 Wins games : " << qty2won << std::endl
-	          << "Draw games   : " << qtydraw << std::endl
-	          << std::endl
+	cout << endl
+	     << "Report" << endl
+	     << "Total games  : " << qtygames << endl
+	     << "1 Wins games : " << qty1won << endl
+	     << "2 Wins games : " << qty2won << endl
+	     << "Draw games   : " << qtydraw << endl
+	     << endl
 	;
 }/**/
 
@@ -516,16 +519,16 @@ int main(int argc, char* argv[])
 				b_cleanboth = true;
 				break;
 			case 'h':
-				std::cout << "tic tac toe halp - please explain program" << std::endl
-				          << "-r\tclean rotated games" << std::endl
-				          << "-s\tclean symmetric games" << std::endl
-				          << "-b\tclean rotated, symmetric games" << std::endl
+				cout << "tic tac toe halp - please explain program" << endl
+				     << "-r\tclean rotated games" << endl
+				     << "-s\tclean symmetric games" << endl
+				     << "-b\tclean rotated, symmetric games" << endl
 				;
 				exit(0); break;
 			default:;
 		}
 	}
-	std::cout << "Program beginning.." << std::endl;
+	cout << "Program beginning.." << endl;
 	makeSeeds(); //create first 9 games and add the first move
 	while (not(all_moves_completed)) { //if there are still moves to make
 		all_moves_completed = true; //so it can be deterined if any more moves exist
@@ -535,7 +538,7 @@ int main(int argc, char* argv[])
 			}
 		}
 	}
-	std::cout << "All games created!" << std::endl;
+	cout << "All games created!" << endl;
 	printReport();
 	if (b_cleanrotated or b_cleansymmetric or b_cleanboth) {
 		cleanGames();
