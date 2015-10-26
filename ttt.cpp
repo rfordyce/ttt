@@ -161,26 +161,6 @@ void printGame(const game &g)
 		printBoard(g.boards.at(i));
 }/**/
 
-/*board rotate(board b, int n) // FIXME: no need for this function anymore
-{
-	//if (n < 1) return b; //this safeguard is already performed by for loop
-	board b1,b2;
-	b1 = b;
-	for (int i = 0 ; i < n ; i++) { //rotate n times
-		b2.layout[4] = b1.layout[4]; //center value [4] is equal
-		b2.layout[0] = b1.layout[6]; // 0 1 2
-		b2.layout[1] = b1.layout[3]; // 3 4 5
-		b2.layout[2] = b1.layout[0]; // 6 7 8
-		b2.layout[5] = b1.layout[1];
-		b2.layout[8] = b1.layout[2];
-		b2.layout[7] = b1.layout[5];
-		b2.layout[6] = b1.layout[8];
-		b2.layout[3] = b1.layout[7];
-		b1 = b2; //for next rotation
-	}
-	return b1; //b1 = b2
-}/**/
-
 void rotate2(board &b)
 {
 	board b2 = b; // ugly
@@ -193,14 +173,6 @@ void rotate2(board &b)
 	b.layout[7] = b2.layout[5];
 	b.layout[6] = b2.layout[8];
 	b.layout[3] = b2.layout[7];
-}/**/
-
-/*bool testRotationBoard(board b, board btest, int rotations)
-{
-	board btemp = rotate(btest,rotations);
-	for (int i = 0 ; i < 9 ;i++) //check every layout entry
-		if (b.layout[i] != btemp.layout[i]) return false; //if an entry is not equal, return false
-	return true; //all the entries matched, therefore the rotation is the same
 }/**/
 
 bool testRotationBoard(const board& b, const board& btest, const int& rotations)
@@ -265,69 +237,6 @@ bool testRotationGame(const game &g, const game &gtest)
 		counter_layout_entries = 0; //reset counter for next rotation
 	}
 	return false;
-}/**/
-
-/*board symmetrize(board b, int n) // FIXME: no need for this function anymore
-{
-	board b2;
-	switch (n) {
-		case 1: //147
-			b2.layout[0] = b.layout[2]; // 0 1 2
-			b2.layout[1] = b.layout[1]; // 3 4 5
-			b2.layout[2] = b.layout[0]; // 6 7 8
-			b2.layout[3] = b.layout[5];
-			b2.layout[4] = b.layout[4]; // 2 1 0
-			b2.layout[5] = b.layout[3]; // 5 4 3
-			b2.layout[6] = b.layout[8]; // 8 7 6
-			b2.layout[7] = b.layout[7];
-			b2.layout[8] = b.layout[6];
-			break;
-		case 2: //048
-			b2.layout[0] = b.layout[0]; // 0 1 2
-			b2.layout[1] = b.layout[3]; // 3 4 5
-			b2.layout[2] = b.layout[6]; // 6 7 8
-			b2.layout[3] = b.layout[1];
-			b2.layout[4] = b.layout[4]; // 0 3 6
-			b2.layout[5] = b.layout[7]; // 1 4 7
-			b2.layout[6] = b.layout[2]; // 2 5 8
-			b2.layout[7] = b.layout[5];
-			b2.layout[8] = b.layout[8];
-			break;
-		case 3: //246
-			b2.layout[0] = b.layout[8]; // 0 1 2
-			b2.layout[1] = b.layout[5]; // 3 4 5
-			b2.layout[2] = b.layout[2]; // 6 7 8
-			b2.layout[3] = b.layout[7];
-			b2.layout[4] = b.layout[4]; // 8 5 2
-			b2.layout[5] = b.layout[1]; // 7 4 1
-			b2.layout[6] = b.layout[6]; // 6 3 0
-			b2.layout[7] = b.layout[3];
-			b2.layout[8] = b.layout[0];
-			break;
-		case 4: //345
-			b2.layout[0] = b.layout[6]; // 0 1 2
-			b2.layout[1] = b.layout[7]; // 3 4 5
-			b2.layout[2] = b.layout[8]; // 6 7 8
-			b2.layout[3] = b.layout[3];
-			b2.layout[4] = b.layout[4]; // 6 7 8
-			b2.layout[5] = b.layout[5]; // 3 4 5
-			b2.layout[6] = b.layout[0]; // 0 1 2
-			b2.layout[7] = b.layout[1];
-			b2.layout[8] = b.layout[2];
-			break;
-		default:
-			return b; //no available symmetry
-	}
-	return b2;
-}/**/
-
-/*bool testSymmetric(board b, board btest, int symmetryindex)
-{
-	board b2;
-	b2 = symmetrize(btest,symmetryindex);
-	for (int i = 0; i < 9; i++)
-		if (b.layout[i] != b2.layout[i]) return false; //one value does not match
-	return true;
 }/**/
 
 bool testSymmetric(const board& b, const board& btest, const int &symmetryindex)
@@ -427,18 +336,6 @@ bool testSymmetryRotationGame(const game& g, const game& gtest)
 	}
 	return false;
 }
-
-/*void eraseWinner10() //delete all the games that are symmetric or rotations of previous games (winner == 10)
-{
-	std::cout << "entered eraseWinner10()" << (*games).size() << std::endl;
-	int count = 0;
-	for (int i = (*games).size() - 1 ; i >= 0 ; i--) //check from [(size -1)] to [0]
-		if ((*games).at(i).winner == 10) {
-			(*games).erase((*games).begin() + i);
-			count++;
-		}
-	cout << "removed " << count << " games" << endl;
-}/**/
 
 #include <algorithm>
 bool toDeleteGame(const game& o) // http://stackoverflow.com/a/7958447/4541045
