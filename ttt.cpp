@@ -184,6 +184,7 @@ bool testRotationBoard(const board& b, const board& btest, const int& rotations)
 		if (b.layout[1] != btest.layout[3]) return false; // 3 4 5
 		if (b.layout[2] != btest.layout[0]) return false; // 6 7 8
 		if (b.layout[3] != btest.layout[7]) return false;
+		if (b.layout[4] != btest.layout[4]) return false;
 		if (b.layout[5] != btest.layout[1]) return false; // 6 3 0
 		if (b.layout[6] != btest.layout[8]) return false; // 7 4 1
 		if (b.layout[7] != btest.layout[5]) return false; // 8 5 2
@@ -195,7 +196,7 @@ bool testRotationBoard(const board& b, const board& btest, const int& rotations)
 		if (b.layout[1] != btest.layout[7]) return false; // 3 4 5
 		if (b.layout[2] != btest.layout[6]) return false; // 6 7 8
 		if (b.layout[3] != btest.layout[5]) return false;
-		if (b.layout[4] != btest.layout[4]) return false; // center
+		if (b.layout[4] != btest.layout[4]) return false;
 		if (b.layout[5] != btest.layout[3]) return false; // 8 7 6 
 		if (b.layout[6] != btest.layout[2]) return false; // 5 4 3
 		if (b.layout[7] != btest.layout[1]) return false; // 2 1 0
@@ -207,7 +208,7 @@ bool testRotationBoard(const board& b, const board& btest, const int& rotations)
 		if (b.layout[1] != btest.layout[5]) return false; // 3 4 5
 		if (b.layout[2] != btest.layout[8]) return false; // 6 7 8
 		if (b.layout[3] != btest.layout[1]) return false;
-		if (b.layout[4] != btest.layout[4]) return false; // center
+		if (b.layout[4] != btest.layout[4]) return false;
 		if (b.layout[5] != btest.layout[7]) return false; // 2 5 8
 		if (b.layout[6] != btest.layout[0]) return false; // 1 4 7
 		if (b.layout[7] != btest.layout[3]) return false; // 0 3 6
@@ -243,51 +244,51 @@ bool testSymmetric(const board& b, const board& btest, const int &symmetryindex)
 {
 	switch (symmetryindex) {
 	case 1: //147
-		if(b.layout[0] != btest.layout[2]) return false; // 0 1 2
-		if(b.layout[1] != btest.layout[1]) return false; // 3 4 5
-		if(b.layout[2] != btest.layout[0]) return false; // 6 7 8
-		if(b.layout[3] != btest.layout[5]) return false;
-		if(b.layout[4] != btest.layout[4]) return false;
-		if(b.layout[5] != btest.layout[3]) return false; // 2 1 0
-		if(b.layout[6] != btest.layout[8]) return false; // 5 4 3
-		if(b.layout[7] != btest.layout[7]) return false; // 8 7 6
-		if(b.layout[8] != btest.layout[6]) return false;
+		if (b.layout[0] != btest.layout[2]) return false; // 0 1 2
+		if (b.layout[1] != btest.layout[1]) return false; // 3 4 5
+		if (b.layout[2] != btest.layout[0]) return false; // 6 7 8
+		if (b.layout[3] != btest.layout[5]) return false;
+		if (b.layout[4] != btest.layout[4]) return false;
+		if (b.layout[5] != btest.layout[3]) return false; // 2 1 0
+		if (b.layout[6] != btest.layout[8]) return false; // 5 4 3
+		if (b.layout[7] != btest.layout[7]) return false; // 8 7 6
+		if (b.layout[8] != btest.layout[6]) return false;
 		return true;
 		break;
 	case 2: //048
-		if(b.layout[0] != btest.layout[0]) return false; // 0 1 2
-		if(b.layout[1] != btest.layout[3]) return false; // 3 4 5
-		if(b.layout[2] != btest.layout[6]) return false; // 6 7 8
-		if(b.layout[3] != btest.layout[1]) return false;
-		if(b.layout[4] != btest.layout[4]) return false;
-		if(b.layout[5] != btest.layout[7]) return false; // 0 3 6
-		if(b.layout[6] != btest.layout[2]) return false; // 1 4 7
-		if(b.layout[7] != btest.layout[5]) return false; // 2 5 8
-		if(b.layout[8] != btest.layout[8]) return false;
+		if (b.layout[0] != btest.layout[0]) return false; // 0 1 2
+		if (b.layout[1] != btest.layout[3]) return false; // 3 4 5
+		if (b.layout[2] != btest.layout[6]) return false; // 6 7 8
+		if (b.layout[3] != btest.layout[1]) return false;
+		if (b.layout[4] != btest.layout[4]) return false;
+		if (b.layout[5] != btest.layout[7]) return false; // 0 3 6
+		if (b.layout[6] != btest.layout[2]) return false; // 1 4 7
+		if (b.layout[7] != btest.layout[5]) return false; // 2 5 8
+		if (b.layout[8] != btest.layout[8]) return false;
 		return true;
 		break;
 	case 3: //246
-		if(b.layout[0] != btest.layout[8]) return false; // 0 1 2
-		if(b.layout[1] != btest.layout[5]) return false; // 3 4 5
-		if(b.layout[2] != btest.layout[2]) return false; // 6 7 8
-		if(b.layout[3] != btest.layout[7]) return false;
-		if(b.layout[4] != btest.layout[4]) return false;
-		if(b.layout[5] != btest.layout[1]) return false; // 8 5 2
-		if(b.layout[6] != btest.layout[6]) return false; // 7 4 1
-		if(b.layout[7] != btest.layout[3]) return false; // 6 3 0
-		if(b.layout[8] != btest.layout[0]) return false;
+		if (b.layout[0] != btest.layout[8]) return false; // 0 1 2
+		if (b.layout[1] != btest.layout[5]) return false; // 3 4 5
+		if (b.layout[2] != btest.layout[2]) return false; // 6 7 8
+		if (b.layout[3] != btest.layout[7]) return false;
+		if (b.layout[4] != btest.layout[4]) return false;
+		if (b.layout[5] != btest.layout[1]) return false; // 8 5 2
+		if (b.layout[6] != btest.layout[6]) return false; // 7 4 1
+		if (b.layout[7] != btest.layout[3]) return false; // 6 3 0
+		if (b.layout[8] != btest.layout[0]) return false;
 		return true;
 		break;
 	case 4: //345
-		if(b.layout[0] != btest.layout[6]) return false; // 0 1 2
-		if(b.layout[1] != btest.layout[7]) return false; // 3 4 5
-		if(b.layout[2] != btest.layout[8]) return false; // 6 7 8
-		if(b.layout[3] != btest.layout[3]) return false;
-		if(b.layout[4] != btest.layout[4]) return false;
-		if(b.layout[5] != btest.layout[5]) return false; // 6 7 8
-		if(b.layout[6] != btest.layout[0]) return false; // 3 4 5
-		if(b.layout[7] != btest.layout[1]) return false; // 0 1 2
-		if(b.layout[8] != btest.layout[2]) return false;
+		if (b.layout[0] != btest.layout[6]) return false; // 0 1 2
+		if (b.layout[1] != btest.layout[7]) return false; // 3 4 5
+		if (b.layout[2] != btest.layout[8]) return false; // 6 7 8
+		if (b.layout[3] != btest.layout[3]) return false;
+		if (b.layout[4] != btest.layout[4]) return false;
+		if (b.layout[5] != btest.layout[5]) return false; // 6 7 8
+		if (b.layout[6] != btest.layout[0]) return false; // 3 4 5
+		if (b.layout[7] != btest.layout[1]) return false; // 0 1 2
+		if (b.layout[8] != btest.layout[2]) return false;
 		return true;
 		break;
 	default:
@@ -345,11 +346,12 @@ bool toDeleteGame(const game& o) // http://stackoverflow.com/a/7958447/4541045
 
 void eraseWinner10()
 {
+	cout << "games marked for deletion, now erasing them" << endl;
 	(*games).erase(
 		std::remove_if((*games).begin(), (*games).end(), toDeleteGame),
 		(*games).end()
 	);
-	std::cout << (*games).size() << " games remaining" << std::endl;
+	cout << (*games).size() << " games remaining" << std::endl;
 }
 
 void cleanGames() //go cackwards through the games and delete rotations and symmetries
@@ -357,7 +359,7 @@ void cleanGames() //go cackwards through the games and delete rotations and symm
 	cout << "cleaning games" << endl;
 	
 	if (b_seedsmasher) {
-		std::cout << "cleaning unecessary seeds.." << std::endl;
+		cout << "cleaning unecessary seeds.." << std::endl;
 		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) {
 			if ((*games).at(gameindex).boards.at(0).layout[0] == 0)
 				if ((*games).at(gameindex).boards.at(0).layout[1] == 0)
