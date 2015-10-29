@@ -7,7 +7,6 @@
 bool b_seedsmasher = false;
 bool b_cleanrotated = false;
 bool b_cleansymmetric = false;
-bool b_cleanboth = false;
 
 using std::cout;
 using std::endl;
@@ -326,27 +325,6 @@ bool testSymmetryGame(const game& g, const game& gtest)
 	return false;
 }
 
-bool testSymmetryRotationGame(const game& g, const game& gtest)
-{
-	if (g.boards.size() != gtest.boards.size()) return false; //cannot be the same if not the same size
-	if (g.winner != gtest.winner) return false; //cannot be the same if different winner
-	int counter_symmetric_entries = 0;
-
-	game gmodified;
-
-	for (int symmetryindex = 1; symmetryindex <= 4; symmetryindex++) { // test symmetry 1,2,3,4
-		gmodified = gtest; // reset each iteration FIXME: this is probably really slow
-
-		for (int rotation = 1; rotation <= 3 ; rotation++) { //rotations 1,2,3
-			for (int boardindex = 0; boardindex < (int) g.boards.size() ; boardindex++) { //rotate all the boards
-				rotate2(gmodified.boards.at(boardindex)); // rotations are written to gmodified
-			}
-			if (testSymmetryGame(g,gmodified)) return true; //just use testSymmetryGame to check it
-		} // next rotation
-	}
-	return false;
-}
-
 #include <algorithm> // for std::remove_if
 bool toDeleteGame(const game& o) // http://stackoverflow.com/a/7958447/4541045
 {
@@ -399,17 +377,6 @@ void cleanGames() // go backwards through the games and erase rotations and symm
 		}
 		eraseWinner10();
 	}
-	
-	if (b_cleanboth) {
-		cout << "cleaning rotated, symmetric games.." << endl;
-		#pragma omp parallel for
-		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) { // from (size -1) to zero
-			for (int i = 0; i < gameindex; i++)
-				if (testSymmetryRotationGame((*games).at(gameindex),(*games).at(i))) // test symmetry
-					(*games).at(gameindex).winner = 10;
-		}
-		eraseWinner10();
-	}
 }
 
 void printReport()
@@ -453,7 +420,6 @@ int main(int argc, char* argv[])
 			case 'b': // clean everything!
 				b_cleanrotated = true;
 				b_cleansymmetric = true;
-				b_cleanboth = true;
 				break;
 			case 'f':
 				b_seedsmasher = true;
@@ -462,7 +428,6 @@ int main(int argc, char* argv[])
 				cout << "tic tac toe halp - please explain program" << endl
 				     << "-r\tclean rotated games" << endl
 				     << "-s\tclean symmetric games" << endl
-				     << "-b\tclean rotated, symmetric games" << endl
 				     << "-f\tremove games in rotated seed positions (not starting in first, second, or center)" << std::endl
 				;
 				exit(0); break;
@@ -481,7 +446,7 @@ int main(int argc, char* argv[])
 	}
 	cout << "All games created!" << endl;
 	printReport();
-	if (b_cleanrotated or b_cleansymmetric or b_cleanboth or b_seedsmasher) {
+	if (b_cleanrotated or b_cleansymmetric or b_seedsmasher) {
 		cleanGames();
 		printReport(); // show final results
 	}
