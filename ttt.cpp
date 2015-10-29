@@ -1,8 +1,8 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
-#include <getopt.h> //for getopt()
-#include <cstdlib> //for exit()
+#include <getopt.h> // for getopt()
+#include <cstdlib> // for exit()
 
 bool b_seedsmasher = false;
 bool b_cleanrotated = false;
@@ -20,22 +20,13 @@ class board
 public:
 	board();
 	int layout[9];
-};/**/
+};
 
 int pub_layout[9]; // used to store swaps
 
 board::board()
 {
-	for (int i = 0; i < 9; i++) layout[i] = 0; //set all the entries to 0
-	/*layout[0] = 0;
-	layout[1] = 0;
-	layout[2] = 0;
-	layout[3] = 0;
-	layout[4] = 0;
-	layout[5] = 0;
-	layout[6] = 0;
-	layout[7] = 0;
-	layout[8] = 0;*/
+	for (int i = 0; i < 9; i++) layout[i] = 0; // set all the entries to 0
 }
 
 class game {
@@ -44,7 +35,7 @@ public:
 	game(const game &g);
 	std::vector <board> boards;
 	int winner;
-};/**/
+};
 
 game::game()
 {
@@ -60,28 +51,28 @@ game::game(const game &g)
 const game templateGame;
 const board templateBoard;
 
-std::vector <game> gamesvector; //games vector
-std::vector <game>* games = &gamesvector; //a pointer to gamesvector
+std::vector <game> gamesvector; // games vector
+std::vector <game>* games = &gamesvector; // a pointer to gamesvector
 
 bool all_moves_completed = false;
-int games_deleted_rotation = 0; //how many games have been deleted
+int games_deleted_rotation = 0; // how many games have been deleted
 int games_deleted_symmetry = 0;
 
-void makeSeeds() //it is assumed that 1 moves first
+void makeSeeds() // it is assumed that 1 moves first
 {
 	for (int i = 0; i < 9; i++) (*games).push_back(templateGame);
 	for (int i = 0; i < 9; i++) (*games).at(i).boards.push_back(templateBoard);
 	for (int i = 0; i < 9; i++) (*games).at(i).boards.at(0).layout[i] = 1;
-}/**/
+}
 
 int whoseturn(const board& b)
 {
-	int count = 0; //no moves on the board yet
+	int count = 0; // no moves on the board yet
 	for (int i = 0; i < 9; i++)
-		if (b.layout[i] > 0) count++; //count the moves on the board
-	if (count % 2 == 0) return 1; //2 moves -> 2%2==0 -> turn 1
-	return 2; //not turn 1
-}/**/
+		if (b.layout[i] > 0) count++; // count the moves on the board
+	if (count % 2 == 0) return 1; // 2 moves -> 2%2==0 -> turn 1
+	return 2; // not turn 1
+}
 
 int testWinner(const board &b)
 {
@@ -132,31 +123,31 @@ int testWinner(const board &b)
 	for (int i = 0; i < 9; i++)
 		if (b.layout[i] < 1) return 0; //game incomplete -> keep going
 	return 3; //game is a draw
-}/**/
+}
 
 void addGames(game &g)
 {
-	bool firstgame = true; //if this the first game board it should edit the pointer
-	game gtemp(g); //new game (duplicate of g) using constructor
-	board b = g.boards.back(); //could be a pointer
+	bool firstgame = true; // if this the first game board it should edit the pointer
+	game gtemp(g); // new game (duplicate of g) using constructor
+	board b = g.boards.back();
 	int turn = whoseturn(b);
-	for (int i = 0; i < 9; i++) { //try each location
-		if (b.layout[i] < 1) { //no move in location i
-			if (firstgame) { //edit the game pointer
-				g.boards.push_back(b); //new game board
-				g.boards.back().layout[i] = turn; //put the move into the last layout
-				g.winner = testWinner(g.boards.back()); //revise the winner
-				firstgame = false; //no longer the first game
-				all_moves_completed = false; //there may still be more (*games) to do
-			} else { //duplicate game to edit
-				(*games).push_back(gtemp); //duplicate game at end of vector
+	for (int i = 0; i < 9; i++) { // try each location
+		if (b.layout[i] < 1) { // no move in location i
+			if (firstgame) { // edit the game pointer
+				g.boards.push_back(b); // new game board
+				g.boards.back().layout[i] = turn; // put the move into the last layout
+				g.winner = testWinner(g.boards.back()); // revise the winner
+				firstgame = false; // no longer the first game
+				all_moves_completed = false; // there may still be more (*games) to do
+			} else { // duplicate game to edit
+				(*games).push_back(gtemp); // duplicate game at end of vector
 				(*games).back().boards.push_back(b);
-				(*games).back().boards.back().layout[i] = turn; //put the move into the last layout
-				(*games).back().winner = testWinner((*games).back().boards.back()); //revise the winner
+				(*games).back().boards.back().layout[i] = turn; // put the move into the last layout
+				(*games).back().winner = testWinner((*games).back().boards.back()); // revise the winner
 			}
 		}
 	}
-}/**/
+}
 
 void printBoard(const board &b)
 {
@@ -165,27 +156,13 @@ void printBoard(const board &b)
 	     << b.layout[6] << b.layout[7] << b.layout[8] << endl
 	     << endl
 	;
-}/**/
+}
 
 void printGame(const game &g)
 {
 	for (int i = 0; i < (int) g.boards.size(); i++)
 		printBoard(g.boards.at(i));
-}/**/
-
-/*void rotate2(board &b)
-{
-	board b2 = b; // ugly
-	b.layout[0] = b2.layout[6]; // 0 1 2
-	b.layout[1] = b2.layout[3]; // 3 4 5
-	b.layout[2] = b2.layout[0]; // 6 7 8
-	b.layout[3] = b2.layout[7];
-	//b.layout[4] = b.layout[4]; //center value [4] is equal
-	b.layout[5] = b2.layout[1];
-	b.layout[6] = b2.layout[8];
-	b.layout[7] = b2.layout[5];
-	b.layout[8] = b2.layout[2];
-}/**/
+}
 
 bool testSeeds(const board& b)
 {
@@ -199,8 +176,6 @@ bool testSeeds(const board& b)
 #include <cstring> // for std::memcpy
 void rotate2(board &b)
 {
-	/*pub_layout = {b.layout[6],b.layout[3],b.layout[0],b.layout[7],b.layout[1],b.layout[8],b.layout[5],b.layout[2]};
-	b.layout = pub_layout;*/
 	// no need to allocate a new board object or array if outside
 	pub_layout[0] = b.layout[6]; // corner four
 	pub_layout[6] = b.layout[8];
@@ -216,7 +191,6 @@ void rotate2(board &b)
 
 bool testRotationBoard(const board& b, const board& btest, const int& rotations)
 {
-	//if (b.layout[4] != btest.layout[4]) return false; // test center
 	switch(rotations) {
 	case 1:
 		if (b.layout[0] != btest.layout[6]) return false; // 0 1 2
@@ -255,8 +229,7 @@ bool testRotationBoard(const board& b, const board& btest, const int& rotations)
 		return true;
 		break;
 	default:
-		// flag error - this this should always be 1,2,3
-		return true;
+		return true; // flag error? - this this should always be 1,2,3
 	}
 }
 
@@ -265,7 +238,7 @@ bool testRotationGame(const game &g, const game &gtest)
 	if (g.boards.size() != gtest.boards.size()) return false; //cannot be the same if not the same size
 	if (g.winner != gtest.winner) return false; //cannot be the same if different winner
 	int counter_layout_entries = 0;
-	//board btest;
+
 	for (int rotation = 1; rotation <= 3 ; rotation++) { //rotations 1,2,3
 		for (int boardindex = 0; boardindex < (int) g.boards.size() ; boardindex++) { //all boards to be rotated by rotation
 			if (testRotationBoard(g.boards.at(boardindex), gtest.boards.at(boardindex), rotation))
@@ -274,15 +247,15 @@ bool testRotationGame(const game &g, const game &gtest)
 				boardindex = 99; // exit for()
 		}
 		if ((int) g.boards.size() == counter_layout_entries) return true; //this rotation is the same
-		counter_layout_entries = 0; //reset counter for next rotation
+		counter_layout_entries = 0; // reset counter for next rotation
 	}
 	return false;
-}/**/
+}
 
 bool testSymmetric(const board& b, const board& btest, const int &symmetryindex)
 {
 	switch (symmetryindex) {
-	case 1: //147
+	case 1: // about 147
 		if (b.layout[0] != btest.layout[2]) return false; // 0 1 2
 		if (b.layout[1] != btest.layout[1]) return false; // 3 4 5
 		if (b.layout[2] != btest.layout[0]) return false; // 6 7 8
@@ -294,7 +267,7 @@ bool testSymmetric(const board& b, const board& btest, const int &symmetryindex)
 		if (b.layout[8] != btest.layout[6]) return false;
 		return true;
 		break;
-	case 2: //048
+	case 2: // about 048
 		if (b.layout[0] != btest.layout[0]) return false; // 0 1 2
 		if (b.layout[1] != btest.layout[3]) return false; // 3 4 5
 		if (b.layout[2] != btest.layout[6]) return false; // 6 7 8
@@ -306,7 +279,7 @@ bool testSymmetric(const board& b, const board& btest, const int &symmetryindex)
 		if (b.layout[8] != btest.layout[8]) return false;
 		return true;
 		break;
-	case 3: //246
+	case 3: // about 246
 		if (b.layout[0] != btest.layout[8]) return false; // 0 1 2
 		if (b.layout[1] != btest.layout[5]) return false; // 3 4 5
 		if (b.layout[2] != btest.layout[2]) return false; // 6 7 8
@@ -318,7 +291,7 @@ bool testSymmetric(const board& b, const board& btest, const int &symmetryindex)
 		if (b.layout[8] != btest.layout[0]) return false;
 		return true;
 		break;
-	case 4: //345
+	case 4: // about 345
 		if (b.layout[0] != btest.layout[6]) return false; // 0 1 2
 		if (b.layout[1] != btest.layout[7]) return false; // 3 4 5
 		if (b.layout[2] != btest.layout[8]) return false; // 6 7 8
@@ -331,15 +304,14 @@ bool testSymmetric(const board& b, const board& btest, const int &symmetryindex)
 		return true;
 		break;
 	default:
-		// flag error - this this should always be 1,2,3,4
-		return true;
+		return true; // flag error - this this should always be 1,2,3,4
 	}
 }
 
 bool testSymmetryGame(const game& g, const game& gtest)
 {
-	if (g.boards.size() != gtest.boards.size()) return false; //cannot be the same if not the same size
-	if (g.winner != gtest.winner) return false; //cannot be the same if different winner
+	if (g.boards.size() != gtest.boards.size()) return false; // cannot be the same if not the same size
+	if (g.winner != gtest.winner) return false; // cannot be the same if different winner
 	int counter_symmetric_entries = 0;
 	for (int symmetryindex = 1; symmetryindex <= 4; symmetryindex++) { //test symmetry 1,2,3,4
 		for (int boardindex = 0; boardindex < (int) g.boards.size(); boardindex++) {
@@ -352,7 +324,7 @@ bool testSymmetryGame(const game& g, const game& gtest)
 		counter_symmetric_entries = 0;
 	}
 	return false;
-}/**/
+}
 
 bool testSymmetryRotationGame(const game& g, const game& gtest)
 {
@@ -361,14 +333,12 @@ bool testSymmetryRotationGame(const game& g, const game& gtest)
 	int counter_symmetric_entries = 0;
 
 	game gmodified;
-	//game gmodified = gtest;
-	
-	for (int symmetryindex = 1; symmetryindex <= 4; symmetryindex++) { //test symmetry 1,2,3,4
+
+	for (int symmetryindex = 1; symmetryindex <= 4; symmetryindex++) { // test symmetry 1,2,3,4
 		gmodified = gtest; // reset each iteration FIXME: this is probably really slow
 
 		for (int rotation = 1; rotation <= 3 ; rotation++) { //rotations 1,2,3
 			for (int boardindex = 0; boardindex < (int) g.boards.size() ; boardindex++) { //rotate all the boards
-				//gmodified.boards.at(boardindex) = rotate(gtest.boards.at(boardindex),rotation);
 				rotate2(gmodified.boards.at(boardindex)); // rotations are written to gmodified
 			}
 			if (testSymmetryGame(g,gmodified)) return true; //just use testSymmetryGame to check it
@@ -394,7 +364,7 @@ void eraseWinner10()
 	cout << (*games).size() << " games remaining (" << initial_games - (*games).size() << " erased)" << endl;
 }
 
-void cleanGames() //go backwards through the games and erase rotations and symmetries
+void cleanGames() // go backwards through the games and erase rotations and symmetries
 {
 	cout << "cleaning games" << endl;
 	
@@ -410,10 +380,10 @@ void cleanGames() //go backwards through the games and erase rotations and symme
 	if (b_cleanrotated) {
 		cout << "cleaning rotated games.." << endl;
 		#pragma omp parallel for
-		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) { //from (size -1) to zero
-			//cout << "processing game " << gameindex << endl;
+		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) { // from (size -1) to zero
+			// cout << "processing game " << gameindex << endl;
 			for (int i = 0; i < gameindex; i++)
-				if (testRotationGame((*games).at(gameindex),(*games).at(i))) //test rotation
+				if (testRotationGame((*games).at(gameindex),(*games).at(i))) // test rotation
 					(*games).at(gameindex).winner = 10;
 		}
 		eraseWinner10();
@@ -422,9 +392,9 @@ void cleanGames() //go backwards through the games and erase rotations and symme
 	if (b_cleansymmetric) {
 		cout << "cleaning symmetric games.." << endl;
 		#pragma omp parallel for
-		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) { //from (size -1) to zero
+		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) { // from (size -1) to zero
 			for (int i = 0; i < gameindex; i++)
-				if (testSymmetryGame((*games).at(gameindex),(*games).at(i))) //test symmetry
+				if (testSymmetryGame((*games).at(gameindex),(*games).at(i))) // test symmetry
 					(*games).at(gameindex).winner = 10;
 		}
 		eraseWinner10();
@@ -433,14 +403,14 @@ void cleanGames() //go backwards through the games and erase rotations and symme
 	if (b_cleanboth) {
 		cout << "cleaning rotated, symmetric games.." << endl;
 		#pragma omp parallel for
-		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) { //from (size -1) to zero
+		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) { // from (size -1) to zero
 			for (int i = 0; i < gameindex; i++)
-				if (testSymmetryRotationGame((*games).at(gameindex),(*games).at(i))) //test symmetry
+				if (testSymmetryRotationGame((*games).at(gameindex),(*games).at(i))) // test symmetry
 					(*games).at(gameindex).winner = 10;
 		}
 		eraseWinner10();
 	}
-}/**/
+}
 
 void printReport()
 {
@@ -459,7 +429,6 @@ void printReport()
 				cout << "found bad value!" << endl;
 		}
 	}
-	//int qtydraw = qty(*games) - (qty1won + qty2won);
 	cout << endl
 	     << "Report" << endl
 	     << "Total games  : " << qtygames << endl
@@ -468,7 +437,7 @@ void printReport()
 	     << "Draw games   : " << qtydraw << endl
 	     << endl
 	;
-}/**/
+}
 
 int main(int argc, char* argv[])
 {
@@ -481,7 +450,7 @@ int main(int argc, char* argv[])
 			case 's':
 				b_cleansymmetric = true;
 				break;
-			case 'b': //clean everything!
+			case 'b': // clean everything!
 				b_cleanrotated = true;
 				b_cleansymmetric = true;
 				b_cleanboth = true;
@@ -501,12 +470,12 @@ int main(int argc, char* argv[])
 		}
 	}
 	cout << "Program beginning.." << endl;
-	makeSeeds(); //create first 9 games and add the first move
-	while (not(all_moves_completed)) { //if there are still moves to make
-		all_moves_completed = true; //so it can be deterined if any more moves exist
+	makeSeeds(); // create first 9 games and add the first move
+	while (not(all_moves_completed)) { // if there are still moves to make
+		all_moves_completed = true; // so it can be deterined if any more moves exist
 		for (int i = 0; i < (int) (*games).size(); i++) {
-			if ((*games).at(i).winner < 1) { //nobody has won yet
-				addGames((*games).at(i)); //new games in array incoming!
+			if ((*games).at(i).winner < 1) { // nobody has won yet
+				addGames((*games).at(i)); // new games in array incoming!
 			}
 		}
 	}
@@ -514,7 +483,7 @@ int main(int argc, char* argv[])
 	printReport();
 	if (b_cleanrotated or b_cleansymmetric or b_cleanboth or b_seedsmasher) {
 		cleanGames();
-		printReport(); //show final results
+		printReport(); // show final results
 	}
 	return 0;
-}/**/
+}
