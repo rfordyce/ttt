@@ -22,9 +22,20 @@ public:
 	int layout[9];
 };/**/
 
+int pub_layout[9]; // used to store swaps
+
 board::board()
 {
 	for (int i = 0; i < 9; i++) layout[i] = 0; //set all the entries to 0
+	/*layout[0] = 0;
+	layout[1] = 0;
+	layout[2] = 0;
+	layout[3] = 0;
+	layout[4] = 0;
+	layout[5] = 0;
+	layout[6] = 0;
+	layout[7] = 0;
+	layout[8] = 0;*/
 }
 
 class game {
@@ -152,6 +163,7 @@ void printBoard(const board &b)
 	cout << b.layout[0] << b.layout[1] << b.layout[2] << endl
 	     << b.layout[3] << b.layout[4] << b.layout[5] << endl
 	     << b.layout[6] << b.layout[7] << b.layout[8] << endl
+	     << endl
 	;
 }/**/
 
@@ -161,19 +173,46 @@ void printGame(const game &g)
 		printBoard(g.boards.at(i));
 }/**/
 
-void rotate2(board &b)
+/*void rotate2(board &b)
 {
 	board b2 = b; // ugly
-	//b.layout[4] = b.layout[4]; //center value [4] is equal
 	b.layout[0] = b2.layout[6]; // 0 1 2
 	b.layout[1] = b2.layout[3]; // 3 4 5
 	b.layout[2] = b2.layout[0]; // 6 7 8
-	b.layout[5] = b2.layout[1];
-	b.layout[8] = b2.layout[2];
-	b.layout[7] = b2.layout[5];
-	b.layout[6] = b2.layout[8];
 	b.layout[3] = b2.layout[7];
+	//b.layout[4] = b.layout[4]; //center value [4] is equal
+	b.layout[5] = b2.layout[1];
+	b.layout[6] = b2.layout[8];
+	b.layout[7] = b2.layout[5];
+	b.layout[8] = b2.layout[2];
 }/**/
+
+bool testSeeds(const board& b)
+{
+	if (b.layout[0] == 0)
+		if (b.layout[1] == 0)
+			if (b.layout[4] == 0)
+				return true;
+	return false;
+}
+
+#include <cstring> // for std::memcpy
+void rotate2(board &b)
+{
+	/*pub_layout = {b.layout[6],b.layout[3],b.layout[0],b.layout[7],b.layout[1],b.layout[8],b.layout[5],b.layout[2]};
+	b.layout = pub_layout;*/
+	// no need to allocate a new board object or array if outside
+	pub_layout[0] = b.layout[6]; // corner four
+	pub_layout[6] = b.layout[8];
+	pub_layout[8] = b.layout[2];
+	pub_layout[2] = b.layout[0];
+	// ---
+	pub_layout[1] = b.layout[3]; // center four
+	pub_layout[3] = b.layout[7];
+	pub_layout[7] = b.layout[5];
+	pub_layout[5] = b.layout[1];
+	std::memcpy(b.layout,pub_layout,sizeof(pub_layout));
+}
 
 bool testRotationBoard(const board& b, const board& btest, const int& rotations)
 {
@@ -188,7 +227,7 @@ bool testRotationBoard(const board& b, const board& btest, const int& rotations)
 		if (b.layout[5] != btest.layout[1]) return false; // 6 3 0
 		if (b.layout[6] != btest.layout[8]) return false; // 7 4 1
 		if (b.layout[7] != btest.layout[5]) return false; // 8 5 2
-		if (b.layout[8] != btest.layout[6]) return false;
+		if (b.layout[8] != btest.layout[2]) return false;
 		return true;
 		break;
 	case 2:
@@ -321,16 +360,16 @@ bool testSymmetryRotationGame(const game& g, const game& gtest)
 	if (g.winner != gtest.winner) return false; //cannot be the same if different winner
 	int counter_symmetric_entries = 0;
 
-	//game gmodified;
-	game gmodified = gtest;
+	game gmodified;
+	//game gmodified = gtest;
 	
 	for (int symmetryindex = 1; symmetryindex <= 4; symmetryindex++) { //test symmetry 1,2,3,4
-		//gmodified = gtest;
+		gmodified = gtest; // reset each iteration FIXME: this is probably really slow
 
 		for (int rotation = 1; rotation <= 3 ; rotation++) { //rotations 1,2,3
 			for (int boardindex = 0; boardindex < (int) g.boards.size() ; boardindex++) { //rotate all the boards
 				//gmodified.boards.at(boardindex) = rotate(gtest.boards.at(boardindex),rotation);
-				rotate2(gmodified.boards.at(boardindex));
+				rotate2(gmodified.boards.at(boardindex)); // rotations are written to gmodified
 			}
 			if (testSymmetryGame(g,gmodified)) return true; //just use testSymmetryGame to check it
 		} // next rotation
@@ -338,7 +377,7 @@ bool testSymmetryRotationGame(const game& g, const game& gtest)
 	return false;
 }
 
-#include <algorithm>
+#include <algorithm> // for std::remove_if
 bool toDeleteGame(const game& o) // http://stackoverflow.com/a/7958447/4541045
 {
 	return (o.winner == 10);
@@ -346,25 +385,24 @@ bool toDeleteGame(const game& o) // http://stackoverflow.com/a/7958447/4541045
 
 void eraseWinner10()
 {
+	int initial_games = (*games).size();
 	cout << "games marked for deletion, now erasing them" << endl;
 	(*games).erase(
 		std::remove_if((*games).begin(), (*games).end(), toDeleteGame),
 		(*games).end()
 	);
-	cout << (*games).size() << " games remaining" << std::endl;
+	cout << (*games).size() << " games remaining (" << initial_games - (*games).size() << " erased)" << endl;
 }
 
-void cleanGames() //go cackwards through the games and delete rotations and symmetries
+void cleanGames() //go backwards through the games and erase rotations and symmetries
 {
 	cout << "cleaning games" << endl;
 	
 	if (b_seedsmasher) {
 		cout << "cleaning unecessary seeds.." << std::endl;
 		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) {
-			if ((*games).at(gameindex).boards.at(0).layout[0] == 0)
-				if ((*games).at(gameindex).boards.at(0).layout[1] == 0)
-					if ((*games).at(gameindex).boards.at(0).layout[4] == 0)
-						(*games).at(gameindex).winner = 10;
+			if (testSeeds((*games).at(gameindex).boards.at(0)))
+				(*games).at(gameindex).winner = 10;
 		}
 		eraseWinner10();
 	}
@@ -404,12 +442,12 @@ void cleanGames() //go cackwards through the games and delete rotations and symm
 	}
 }/**/
 
-void printReport() //before results have been cleaned
+void printReport()
 {
 	int qtygames = (*games).size();
 	int qty1won = 0;
 	int qty2won = 0;
-	int qtydraw = 0; //optimize later?
+	int qtydraw = 0;
 	for (int i = 0; i < (int) (*games).size(); i++) {
 		switch((*games).at(i).winner) {
 			case 1: qty1won++;break;
