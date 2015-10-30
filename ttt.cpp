@@ -21,8 +21,6 @@ public:
 	int layout[9];
 };
 
-int pub_layout[9]; // used to store swaps
-
 board::board()
 {
 	for (int i = 0; i < 9; i++) layout[i] = 0; // set all the entries to 0
@@ -47,17 +45,14 @@ game::game(const game &g)
 	winner = g.winner;
 }
 
-const game templateGame;
-const board templateBoard;
-
 std::vector <game> games; // games vector
 
 bool all_moves_completed = false;
-int games_deleted_rotation = 0; // how many games have been deleted
-int games_deleted_symmetry = 0;
 
 void makeSeeds() // it is assumed that 1 moves first
 {
+	const game templateGame;
+	const board templateBoard;
 	for (int i = 0; i < 9; i++) games.push_back(templateGame);
 	for (int i = 0; i < 9; i++) games.at(i).boards.push_back(templateBoard);
 	for (int i = 0; i < 9; i++) games.at(i).boards.at(0).layout[i] = 1;
@@ -327,7 +322,7 @@ void eraseWinner10()
 
 void cleanGames() // go backwards through the games and erase rotations and symmetries
 {
-	cout << "cleaning games" << endl;
+	cout << "Cleaning games!" << endl;
 	
 	if (b_seedsmasher) {
 		cout << "cleaning unecessary seeds.." << std::endl;
@@ -419,6 +414,7 @@ int main(int argc, char* argv[])
 	}
 	cout << "Program beginning.." << endl;
 	makeSeeds(); // create first 9 games and add the first move
+	cout << "Creating games!" << endl;
 	while (not(all_moves_completed)) { // if there are still moves to make
 		all_moves_completed = true; // so it can be deterined if any more moves exist
 		for (int i = 0; i < (int) games.size(); i++) {
