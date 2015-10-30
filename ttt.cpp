@@ -171,22 +171,6 @@ bool testSeeds(const board& b)
 	return false;
 }
 
-#include <cstring> // for std::memcpy
-void rotate2(board &b)
-{
-	// no need to allocate a new board object or array if outside
-	pub_layout[0] = b.layout[6]; // corner four
-	pub_layout[6] = b.layout[8];
-	pub_layout[8] = b.layout[2];
-	pub_layout[2] = b.layout[0];
-	// ---
-	pub_layout[1] = b.layout[3]; // center four
-	pub_layout[3] = b.layout[7];
-	pub_layout[7] = b.layout[5];
-	pub_layout[5] = b.layout[1];
-	std::memcpy(b.layout,pub_layout,sizeof(pub_layout));
-}
-
 bool testRotationBoard(const board& b, const board& btest, const int& rotations)
 {
 	switch(rotations) {
