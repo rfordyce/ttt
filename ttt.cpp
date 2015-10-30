@@ -50,8 +50,7 @@ game::game(const game &g)
 const game templateGame;
 const board templateBoard;
 
-std::vector <game> gamesvector; // games vector
-std::vector <game>* games = &gamesvector; // a pointer to gamesvector
+std::vector <game> games; // games vector
 
 bool all_moves_completed = false;
 int games_deleted_rotation = 0; // how many games have been deleted
@@ -59,9 +58,9 @@ int games_deleted_symmetry = 0;
 
 void makeSeeds() // it is assumed that 1 moves first
 {
-	for (int i = 0; i < 9; i++) (*games).push_back(templateGame);
-	for (int i = 0; i < 9; i++) (*games).at(i).boards.push_back(templateBoard);
-	for (int i = 0; i < 9; i++) (*games).at(i).boards.at(0).layout[i] = 1;
+	for (int i = 0; i < 9; i++) games.push_back(templateGame);
+	for (int i = 0; i < 9; i++) games.at(i).boards.push_back(templateBoard);
+	for (int i = 0; i < 9; i++) games.at(i).boards.at(0).layout[i] = 1;
 }
 
 int whoseturn(const board& b)
@@ -139,10 +138,10 @@ void addGames(game &g)
 				firstgame = false; // no longer the first game
 				all_moves_completed = false; // there may still be more (*games) to do
 			} else { // duplicate game to edit
-				(*games).push_back(gtemp); // duplicate game at end of vector
-				(*games).back().boards.push_back(b);
-				(*games).back().boards.back().layout[i] = turn; // put the move into the last layout
-				(*games).back().winner = testWinner((*games).back().boards.back()); // revise the winner
+				games.push_back(gtemp); // duplicate game at end of vector
+				games.back().boards.push_back(b);
+				games.back().boards.back().layout[i] = turn; // put the move into the last layout
+				games.back().winner = testWinner(games.back().boards.back()); // revise the winner
 			}
 		}
 	}
@@ -333,13 +332,13 @@ bool toDeleteGame(const game& o) // http://stackoverflow.com/a/7958447/4541045
 
 void eraseWinner10()
 {
-	int initial_games = (*games).size();
+	int initial_games = games.size();
 	cout << "games marked for deletion, now erasing them" << endl;
-	(*games).erase(
-		std::remove_if((*games).begin(), (*games).end(), toDeleteGame),
-		(*games).end()
+	games.erase(
+		std::remove_if(games.begin(), games.end(), toDeleteGame),
+		games.end()
 	);
-	cout << (*games).size() << " games remaining (" << initial_games - (*games).size() << " erased)" << endl;
+	cout << games.size() << " games remaining (" << initial_games - games.size() << " erased)" << endl;
 }
 
 void cleanGames() // go backwards through the games and erase rotations and symmetries
@@ -348,9 +347,9 @@ void cleanGames() // go backwards through the games and erase rotations and symm
 	
 	if (b_seedsmasher) {
 		cout << "cleaning unecessary seeds.." << std::endl;
-		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) {
-			if (testSeeds((*games).at(gameindex).boards.at(0)))
-				(*games).at(gameindex).winner = 10;
+		for (int gameindex = games.size() - 1 ; gameindex >= 0 ; gameindex--) {
+			if (testSeeds(games.at(gameindex).boards.at(0)))
+				games.at(gameindex).winner = 10;
 		}
 		eraseWinner10();
 	}
@@ -358,11 +357,11 @@ void cleanGames() // go backwards through the games and erase rotations and symm
 	if (b_cleanrotated) {
 		cout << "cleaning rotated games.." << endl;
 		#pragma omp parallel for
-		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) { // from (size -1) to zero
+		for (int gameindex = games.size() - 1 ; gameindex >= 0 ; gameindex--) { // from (size -1) to zero
 			// cout << "processing game " << gameindex << endl;
 			for (int i = 0; i < gameindex; i++)
-				if (testRotationGame((*games).at(gameindex),(*games).at(i))) // test rotation
-					(*games).at(gameindex).winner = 10;
+				if (testRotationGame(games.at(gameindex),games.at(i))) // test rotation
+					games.at(gameindex).winner = 10;
 		}
 		eraseWinner10();
 	}
@@ -370,10 +369,10 @@ void cleanGames() // go backwards through the games and erase rotations and symm
 	if (b_cleansymmetric) {
 		cout << "cleaning symmetric games.." << endl;
 		#pragma omp parallel for
-		for (int gameindex = (*games).size() - 1 ; gameindex >= 0 ; gameindex--) { // from (size -1) to zero
+		for (int gameindex = games.size() - 1 ; gameindex >= 0 ; gameindex--) { // from (size -1) to zero
 			for (int i = 0; i < gameindex; i++)
-				if (testSymmetryGame((*games).at(gameindex),(*games).at(i))) // test symmetry
-					(*games).at(gameindex).winner = 10;
+				if (testSymmetryGame(games.at(gameindex),games.at(i))) // test symmetry
+					games.at(gameindex).winner = 10;
 		}
 		eraseWinner10();
 	}
@@ -381,12 +380,12 @@ void cleanGames() // go backwards through the games and erase rotations and symm
 
 void printReport()
 {
-	int qtygames = (*games).size();
+	int qtygames = games.size();
 	int qty1won = 0;
 	int qty2won = 0;
 	int qtydraw = 0;
-	for (int i = 0; i < (int) (*games).size(); i++) {
-		switch((*games).at(i).winner) {
+	for (int i = 0; i < (int) games.size(); i++) {
+		switch(games.at(i).winner) {
 			case 1: qty1won++;break;
 			case 2: qty2won++;break;
 			case 3: qtydraw++;break;
@@ -438,9 +437,9 @@ int main(int argc, char* argv[])
 	makeSeeds(); // create first 9 games and add the first move
 	while (not(all_moves_completed)) { // if there are still moves to make
 		all_moves_completed = true; // so it can be deterined if any more moves exist
-		for (int i = 0; i < (int) (*games).size(); i++) {
-			if ((*games).at(i).winner < 1) { // nobody has won yet
-				addGames((*games).at(i)); // new games in array incoming!
+		for (int i = 0; i < (int) games.size(); i++) {
+			if (games.at(i).winner < 1) { // nobody has won yet
+				addGames(games.at(i)); // new games in array incoming!
 			}
 		}
 	}
