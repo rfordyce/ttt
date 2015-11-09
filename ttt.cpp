@@ -320,9 +320,36 @@ void eraseWinner10()
 	cout << games.size() << " games remaining (" << initial_games - games.size() << " erased)" << endl;
 }
 
+void testRotationThread(int start, int end)
+{
+		for (int gameindex = start ; gameindex >= end ; gameindex--) { // from (size -1) to zero
+			for (int i = 0; i < gameindex; i++)
+				if (testRotationGame(games.at(gameindex),games.at(i))) // test rotation
+					games.at(gameindex).winner = 10;
+}
+
+#include <math.h>
+void splitsummation(double N, int ret[], int split)
+{
+	/*double sum = (N * (N+1) / 2);
+	for (int i = 0; i < split; i++) {
+		ret[i] = (0.5 * (sqrt(sum/split * (i+1) * 8 + 1) - 1));
+	}*/
+
+	/* Triangular numbers (sum) calculated by sum = (N * (N+1) / 2)
+	 * therefore N = 0.5 * sqrt(sum * 8 + 1) - 1
+	 * the sum should be divided about evenly,
+	 * with each successive sum should including the previous portion
+	 */
+	for (int i = 0; i < split; i++)
+		ret[i] = 0.5 * (sqrt((N * N + N)/split * (i+1) * 4 + 1) - 1);
+}
+
+#include <thread> // c++11 threading library
 void cleanGames() // go backwards through the games and erase rotations and symmetries
 {
 	cout << "Cleaning games!" << endl;
+	std::thread threads[number_of_threads]; // create threads
 	
 	if (b_seedsmasher) {
 		cout << "cleaning unecessary seeds.." << std::endl;
@@ -335,19 +362,16 @@ void cleanGames() // go backwards through the games and erase rotations and symm
 	
 	if (b_cleanrotated) {
 		cout << "cleaning rotated games.." << endl;
-		#pragma omp parallel for
-		for (int gameindex = games.size() - 1 ; gameindex >= 0 ; gameindex--) { // from (size -1) to zero
-			// cout << "processing game " << gameindex << endl;
-			for (int i = 0; i < gameindex; i++)
-				if (testRotationGame(games.at(gameindex),games.at(i))) // test rotation
-					games.at(gameindex).winner = 10;
+		for (int t = 0; t < number_of_threads; t++) {
+			threads[t] = std::thread(testRotationThread, start, end);
 		}
+		// join threads
 		eraseWinner10();
 	}
+
 	
 	if (b_cleansymmetric) {
 		cout << "cleaning symmetric games.." << endl;
-		#pragma omp parallel for
 		for (int gameindex = games.size() - 1 ; gameindex >= 0 ; gameindex--) { // from (size -1) to zero
 			for (int i = 0; i < gameindex; i++)
 				if (testSymmetryGame(games.at(gameindex),games.at(i))) // test symmetry
