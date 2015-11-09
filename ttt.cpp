@@ -3,6 +3,8 @@
 #include <vector>
 #include <getopt.h> // for getopt()
 #include <cstdlib> // for exit()
+#include <thread> // c++11 threading library
+#include <math.h> // for sqrt
 
 bool b_seedsmasher = false;
 bool b_cleanrotated = false;
@@ -12,6 +14,7 @@ int number_of_threads = 1;
 
 using std::cout;
 using std::endl;
+using std::thread;
 
 // 0 1 2
 // 3 4 5
@@ -319,30 +322,27 @@ void eraseWinner10()
 		std::remove_if(games.begin(), games.end(), toDeleteGame),
 		games.end()
 	);
-	cout << games.size() << " games remaining (" << initial_games - games.size() << " erased)" << endl;
+	cout << games.size() << " games remaining (" << initial_games - games.size() << " erased)" << endl
+		<< endl;
 }
 
 void testRotationThread(const int start, const int end)
 {
-	cout << "running thread! with values " << start << " and " << end << endl;
 	for (int gameindex = end; gameindex >= start ; gameindex--) // from (size -1) to zero
 		for (int i = 0; i < gameindex; i++)
 			if (testRotationGame(games.at(gameindex),games.at(i))) // test rotation
 				games.at(gameindex).winner = 10;
-	cout << "leaving thread ending in " << end << endl;
 }
 
 void testSymmetryThread(const int start, const int end)
 {
-	cout << "running thread! with values " << start << " and " << end << endl;
 	for (int gameindex = end; gameindex >= start ; gameindex--) // from (size -1) to zero
 		for (int i = 0; i < gameindex; i++)
 			if (testSymmetryGame(games.at(gameindex),games.at(i))) // test rotation
 				games.at(gameindex).winner = 10;
-	cout << "leaving thread ending in " << end << endl;
 }
 
-#include <math.h>
+
 void splitSummation(const double N, const int split, int ret[])
 {
 	/*double sum = (N * (N+1) / 2);
@@ -359,11 +359,10 @@ void splitSummation(const double N, const int split, int ret[])
 		ret[i] = 0.5 * (sqrt((N * N + N)/split * (i+1) * 4 + 1) - 1);
 }
 
-#include <thread> // c++11 threading library
 void cleanGames() // go backwards through the games and erase rotations and symmetries
 {
 	cout << "Cleaning games!" << endl;
-	std::thread threads[number_of_threads]; // create threads
+	thread threads[number_of_threads]; // create threads
 
 	int thread_terminations[number_of_threads];
 	
@@ -379,9 +378,9 @@ void cleanGames() // go backwards through the games and erase rotations and symm
 	if (b_cleanrotated) {
 		cout << "cleaning rotated games.." << endl;
 		splitSummation(games.size() - 1,number_of_threads,thread_terminations); // less one from size because it's an array
-		threads[0] = std::thread(testRotationThread, 0, thread_terminations[0]); // prevent bad things
+		threads[0] = thread(testRotationThread, 0, thread_terminations[0]); // prevent bad things
 		for (int i = 1; i < number_of_threads; i++)
-			threads[i] = std::thread(testRotationThread, thread_terminations[i-1], thread_terminations[i]);
+			threads[i] = thread(testRotationThread, thread_terminations[i-1], thread_terminations[i]);
 		for (int i = 0; i < number_of_threads; i++)
 			threads[i].join();
 		eraseWinner10();
@@ -390,9 +389,9 @@ void cleanGames() // go backwards through the games and erase rotations and symm
 	if (b_cleansymmetric) {
 		cout << "cleaning symmetric games.." << endl;
 		splitSummation(games.size() - 1,number_of_threads,thread_terminations); // less one from size because it's an array
-		threads[0] = std::thread(testSymmetryThread, 0, thread_terminations[0]); // prevent bad things
+		threads[0] = thread(testSymmetryThread, 0, thread_terminations[0]); // prevent bad things
 		for (int i = 1; i < number_of_threads; i++)
-			threads[i] = std::thread(testSymmetryThread, thread_terminations[i-1], thread_terminations[i]);
+			threads[i] = thread(testSymmetryThread, thread_terminations[i-1], thread_terminations[i]);
 		for (int i = 0; i < number_of_threads; i++)
 			threads[i].join();
 		eraseWinner10();
@@ -428,6 +427,7 @@ void printReport()
 
 int main(int argc, char* argv[])
 {
+	cout << "Program beginning.." << endl;
 	int c;
 	while ((c = getopt(argc, argv, "rsbft:h")) != -1) {
 		switch (c) {
@@ -447,7 +447,7 @@ int main(int argc, char* argv[])
 			case 't':
 				number_of_threads = atoi(optarg);
 				if (number_of_threads < 1) number_of_threads = 1;
-				cout << "Performing reduction with " << number_of_threads << " threads." << endl; 
+				cout << "Performing reduction with " << number_of_threads << " threads." << endl;
 				break;
 			case 'h':
 				cout << "tic tac toe halp - please explain program" << endl
@@ -459,7 +459,6 @@ int main(int argc, char* argv[])
 			default:;
 		}
 	}
-	cout << "Program beginning.." << endl;
 	makeSeeds(); // create first 9 games and add the first move
 	cout << "Creating games!" << endl;
 	while (not(all_moves_completed)) { // if there are still moves to make
