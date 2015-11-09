@@ -8,6 +8,8 @@ bool b_seedsmasher = false;
 bool b_cleanrotated = false;
 bool b_cleansymmetric = false;
 
+int number_of_threads = 1;
+
 using std::cout;
 using std::endl;
 
@@ -320,12 +322,24 @@ void eraseWinner10()
 	cout << games.size() << " games remaining (" << initial_games - games.size() << " erased)" << endl;
 }
 
-void testRotationThread(int start, int end)
+void testRotationThread(const int start, const int end)
 {
-		for (int gameindex = start ; gameindex >= end ; gameindex--) { // from (size -1) to zero
-			for (int i = 0; i < gameindex; i++)
-				if (testRotationGame(games.at(gameindex),games.at(i))) // test rotation
-					games.at(gameindex).winner = 10;
+	cout << "running thread! with values " << start << " and " << end << endl;
+	for (int gameindex = end; gameindex >= start ; gameindex--) // from (size -1) to zero
+		for (int i = 0; i < gameindex; i++)
+			if (testRotationGame(games.at(gameindex),games.at(i))) // test rotation
+				games.at(gameindex).winner = 10;
+	cout << "leaving thread ending in " << end << endl;
+}
+
+void testSymmetryThread(const int start, const int end)
+{
+	cout << "running thread! with values " << start << " and " << end << endl;
+	for (int gameindex = end; gameindex >= start ; gameindex--) // from (size -1) to zero
+		for (int i = 0; i < gameindex; i++)
+			if (testSymmetryGame(games.at(gameindex),games.at(i))) // test rotation
+				games.at(gameindex).winner = 10;
+	cout << "leaving thread ending in " << end << endl;
 }
 
 #include <math.h>
@@ -351,7 +365,7 @@ void cleanGames() // go backwards through the games and erase rotations and symm
 	cout << "Cleaning games!" << endl;
 	std::thread threads[number_of_threads]; // create threads
 
-	splitSummation(games.size();)
+	int thread_terminations[number_of_threads];
 	
 	if (b_seedsmasher) {
 		cout << "cleaning unecessary seeds.." << std::endl;
@@ -364,21 +378,23 @@ void cleanGames() // go backwards through the games and erase rotations and symm
 	
 	if (b_cleanrotated) {
 		cout << "cleaning rotated games.." << endl;
-		for (int t = 0; t < number_of_threads; t++) {
-			threads[t] = std::thread(testRotationThread, start, end);
-		}
-		// join threads
+		splitSummation(games.size() - 1,number_of_threads,thread_terminations); // less one from size because it's an array
+		threads[0] = std::thread(testRotationThread, 0, thread_terminations[0]); // prevent bad things
+		for (int i = 1; i < number_of_threads; i++)
+			threads[i] = std::thread(testRotationThread, thread_terminations[i-1], thread_terminations[i]);
+		for (int i = 0; i < number_of_threads; i++)
+			threads[i].join();
 		eraseWinner10();
 	}
-
 	
 	if (b_cleansymmetric) {
 		cout << "cleaning symmetric games.." << endl;
-		for (int gameindex = games.size() - 1 ; gameindex >= 0 ; gameindex--) { // from (size -1) to zero
-			for (int i = 0; i < gameindex; i++)
-				if (testSymmetryGame(games.at(gameindex),games.at(i))) // test symmetry
-					games.at(gameindex).winner = 10;
-		}
+		splitSummation(games.size() - 1,number_of_threads,thread_terminations); // less one from size because it's an array
+		threads[0] = std::thread(testSymmetryThread, 0, thread_terminations[0]); // prevent bad things
+		for (int i = 1; i < number_of_threads; i++)
+			threads[i] = std::thread(testSymmetryThread, thread_terminations[i-1], thread_terminations[i]);
+		for (int i = 0; i < number_of_threads; i++)
+			threads[i].join();
 		eraseWinner10();
 	}
 }
@@ -413,7 +429,7 @@ void printReport()
 int main(int argc, char* argv[])
 {
 	int c;
-	while ((c = getopt(argc, argv, "rsbfh")) != -1) {
+	while ((c = getopt(argc, argv, "rsbft:h")) != -1) {
 		switch (c) {
 			case 'r':
 				b_cleanrotated = true;
@@ -427,6 +443,11 @@ int main(int argc, char* argv[])
 				break;
 			case 'f':
 				b_seedsmasher = true;
+				break;
+			case 't':
+				number_of_threads = atoi(optarg);
+				if (number_of_threads < 1) number_of_threads = 1;
+				cout << "Performing reduction with " << number_of_threads << " threads." << endl; 
 				break;
 			case 'h':
 				cout << "tic tac toe halp - please explain program" << endl
