@@ -329,7 +329,7 @@ void testRotationThread(int start, int end)
 }
 
 #include <math.h>
-void splitsummation(double N, int ret[], int split)
+void splitSummation(const double N, const int split, int ret[])
 {
 	/*double sum = (N * (N+1) / 2);
 	for (int i = 0; i < split; i++) {
@@ -350,6 +350,8 @@ void cleanGames() // go backwards through the games and erase rotations and symm
 {
 	cout << "Cleaning games!" << endl;
 	std::thread threads[number_of_threads]; // create threads
+
+	splitSummation(games.size();)
 	
 	if (b_seedsmasher) {
 		cout << "cleaning unecessary seeds.." << std::endl;
