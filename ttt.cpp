@@ -342,19 +342,25 @@ void testSymmetryThread(const int start, const int end)
 				games.at(gameindex).winner = 10;
 }
 
-
+/* Returns an array containing the upper indicies of N such that the sum of the
+ * series from 1 to N is split equally. The sum of the series from 1 to N is
+ * known as a triangular number, and may calculated by the following equation
+ * sum = (N * (N+1) / 2)
+ * N is given by the positive portion of the inverse function
+ * N = 0.5 * (sqrt(sum * 8 + 1) - 1)
+ *
+ * Dividing the sum by the split forms the first index, and successive indicies
+ * are formed by multiplying again by the number of the index so each
+ * successive sum includes the previous portion.
+ * index = 0.5 * (sqrt(sum * 8 / split * position + 1) - 1)
+ *
+ * Finally
+ * index = 0.5 * (sqrt((N * (N+1) / 2) * 8 / split * position + 1) - 1)
+ * which simplifies to
+ * index = 0.5 * (sqrt( (N * N + N) * 4 / split * position + 1) - 1)
+ */
 void splitSummation(const double N, const int split, int ret[])
 {
-	/*double sum = (N * (N+1) / 2);
-	for (int i = 0; i < split; i++) {
-		ret[i] = (0.5 * (sqrt(sum/split * (i+1) * 8 + 1) - 1));
-	}*/
-
-	/* Triangular numbers (sum) calculated by sum = (N * (N+1) / 2)
-	 * therefore N = 0.5 * sqrt(sum * 8 + 1) - 1
-	 * the sum should be divided about evenly,
-	 * with each successive sum should including the previous portion
-	 */
 	for (int i = 0; i < split; i++)
 		ret[i] = 0.5 * (sqrt((N * N + N)/split * (i+1) * 4 + 1) - 1);
 }
