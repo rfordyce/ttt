@@ -459,7 +459,8 @@ int main(int argc, char* argv[])
 				cout << "tic tac toe halp - please explain program" << endl
 				     << "-r\tclean rotated games" << endl
 				     << "-s\tclean symmetric games" << endl
-				     << "-f\tremove games in rotated seed positions (not starting in first, second, or center)" << std::endl
+				     << "-f\tremove games in rotated seed positions (not starting in first, second, or center)" << endl
+				     << "-t\tthreads to use (specify as -t 4 for 4 threads)" << endl
 				;
 				exit(0); break;
 			default:;
