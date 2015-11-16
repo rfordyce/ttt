@@ -368,7 +368,9 @@ void splitSummation(const double N, const int split, int ret[])
 void cleanGames() // go backwards through the games and erase rotations and symmetries
 {
 	cout << "Cleaning games!" << endl;
-	thread threads[number_of_threads]; // create threads
+	thread* threads;
+	if (number_of_threads > 1)
+		threads = new thread[number_of_threads - 1]; // create threads	
 
 	int thread_terminations[number_of_threads];
 	
@@ -384,10 +386,10 @@ void cleanGames() // go backwards through the games and erase rotations and symm
 	if (b_cleanrotated) {
 		cout << "cleaning rotated games.." << endl;
 		splitSummation(games.size() - 1,number_of_threads,thread_terminations); // less one from size because it's an array
-		threads[0] = thread(testRotationThread, 0, thread_terminations[0]); // prevent bad things
-		for (int i = 1; i < number_of_threads; i++)
-			threads[i] = thread(testRotationThread, thread_terminations[i-1], thread_terminations[i]);
-		for (int i = 0; i < number_of_threads; i++)
+		for (int i = 0; i < number_of_threads - 1; i++)
+			threads[i] = thread(testRotationThread, thread_terminations[i], thread_terminations[i+1]);
+		testRotationThread(0, thread_terminations[0]); // main (this) thread
+		for (int i = 0; i < number_of_threads - 1; i++)
 			threads[i].join();
 		eraseWinner10();
 	}
@@ -395,13 +397,14 @@ void cleanGames() // go backwards through the games and erase rotations and symm
 	if (b_cleansymmetric) {
 		cout << "cleaning symmetric games.." << endl;
 		splitSummation(games.size() - 1,number_of_threads,thread_terminations); // less one from size because it's an array
-		threads[0] = thread(testSymmetryThread, 0, thread_terminations[0]); // prevent bad things
-		for (int i = 1; i < number_of_threads; i++)
-			threads[i] = thread(testSymmetryThread, thread_terminations[i-1], thread_terminations[i]);
-		for (int i = 0; i < number_of_threads; i++)
+		for (int i = 0; i < number_of_threads - 1; i++)
+			threads[i] = thread(testSymmetryThread, thread_terminations[i], thread_terminations[i+1]);
+		testSymmetryThread(0, thread_terminations[0]); // main (this) thread
+		for (int i = 0; i < number_of_threads - 1; i++)
 			threads[i].join();
 		eraseWinner10();
 	}
+	// threads* deleted when function exits
 }
 
 void printReport()
