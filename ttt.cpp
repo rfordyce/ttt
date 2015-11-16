@@ -355,9 +355,10 @@ void testSymmetryThread(const int start, const int end)
  * index = 0.5 * (sqrt(sum * 8 / split * position + 1) - 1)
  *
  * Finally
- * index = 0.5 * (sqrt((N * (N+1) / 2) * 8 / split * position + 1) - 1)
+ * index = 0.5 * (sqrt((N * (N+1) / 2) * 8 / split * position) - 1)
  * which simplifies to
- * index = 0.5 * (sqrt( (N * N + N) * 4 / split * position + 1) - 1)
+ * index = 0.5 * (sqrt( (N * N + N) * 4 / split * position) - 1)
+ * note that position is found as i+1 due to being an array index
  */
 void splitSummation(const double N, const int split, int ret[])
 {
